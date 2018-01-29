@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script src = "http://d3js.org/d3.v3.min.js"></script>
+	<style type="text/css">
+		
+		p{
+        width: 620px;
+        text-align: center;
+        color: black;
+        font-family: "Roboto";
+        font-size: 36px;
+      }
+
+
+		.map{
+			position: fixed;
+			left:24px;
+			top: 250px;
+		}
+
+
+
+	</style>
+
+	<script type="text/javascript">
+
+		function draw(us_geo_data){
+
+			
+			/* create the left container */
+
+			d3.select("body")
+			  .append("g")
+			  .attr("class", "leftContainer")
+			  .attr("width", 620)
+			  .attr("height", 800);
+
+
+			/* add a header */
+
+	        d3.select(".leftContainer")
+        	  .append("p")
+       	      .text("Delayed Flights in 2017");
+
+			/* load the US map by GeoJSON */
+			"use strict"
+			var width = 620,
+				height = 440;
+		
+			/* add a map class */
+			var svg = d3.select(".leftContainer")
+						.append("svg")
+						.attr("width", width)
+						.attr("height", height)
+						.attr('class', 'map');
+
+			var projection = d3.geo.albersUsa()
+							  	   .scale([800])
+							       .translate([width/2, height/2]) ;
+						
+
+			var path = d3.geo.path().projection(projection);
+
+
+			var map = svg.selectAll('path')
+                         .data(us_geo_data.features)
+                     	 .enter()
+                         .append('path')
+                         .attr('d', path)
+                         .style("fill", "rgb(186,202,198)")
+                         .style("stroke","rgb(255,255,255)")
+                         .style("stroke-width", 0.5);
+
+
+		
+
+
+		} // function draw ends
+		
+
+	</script>
+
+
+</head>
+
+<body>
+	<script type="text/javascript">
+		/* Load the Geo JSON file */
+		d3.json("us_states_main.json", draw);
+
+	</script>
+	
+</body>
+
+</html>
