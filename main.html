@@ -2,96 +2,109 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<script src = "http://d3js.org/d3.v3.min.js"></script>
+	<script src = "http://d3js.org/d3.v4.min.js"></script>
+  <script src="https://d3js.org/topojson.v2.min.js"></script>
 	<style type="text/css">
 		
-		p{
-        width: 620px;
-        text-align: center;
-        color: black;
-        font-family: "Roboto";
-        font-size: 36px;
-      }
+  .states {
+    fill: rgb(186,202,198);
+  }
+
+  .states :hover {
+    fill: red;
+  }
+
+  .state-borders {
+    fill: none;
+    stroke: #fff;
+    stroke-width: .8px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+
+  .map{
+    position: fixed;
+    left:24px;
+    top: 300px;
+  }
 
 
-		.map{
-			position: fixed;
-			left:24px;
-			top: 250px;
-		}
-
-
+  .header{
+     width: 620px;
+     text-align: center;
+     color: black;
+     font-family: "Roboto";
+     font-size: 36px;
+     position: fixed;
+     top: 36px;
+  }
 
 	</style>
 
-	<script type="text/javascript">
+	
+  <script type="text/javascript">
 
-		function draw(us_geo_data){
+
+    /*-----Scale the Map ----------*/
+    function scale (scaleFactor) {
+        return d3.geoTransform({
+            point: function(x, y) {
+                this.stream.point(x * scaleFactor, y  * scaleFactor);
+            }
+        });
+    }; // scale function ends
+
+
+    /*--------- Visualize Data ----------*/
+    
+    function draw(us){
 
 			
-			/* create the left container */
+       /* add a header */
 
-			d3.select("body")
-			  .append("g")
-			  .attr("class", "leftContainer")
-			  .attr("width", 620)
-			  .attr("height", 800);
+         d3.select("body")
+           .append("p")
+           .attr("class", "header")
+           .text("Delayed Flights in 2017");
 
+      
+       /* add a SVG map */
+         
+         var svg = d3.select("body")
+            .append("svg")
+            .attr("width", 960)
+            .attr("height", 500)
+            .attr('class', 'map');
 
-			/* add a header */
-
-	        d3.select(".leftContainer")
-        	  .append("p")
-       	      .text("Delayed Flights in 2017");
-
-			/* load the US map by GeoJSON */
-			"use strict"
-			var width = 620,
-				height = 440;
-		
-			/* add a map class */
-			var svg = d3.select(".leftContainer")
-						.append("svg")
-						.attr("width", width)
-						.attr("height", height)
-						.attr('class', 'map');
-
-			var projection = d3.geo.albersUsa()
-							  	   .scale([800])
-							       .translate([width/2, height/2]) ;
-						
-
-			var path = d3.geo.path().projection(projection);
+         var svg = d3.select("svg");
 
 
-			var map = svg.selectAll('path')
-                         .data(us_geo_data.features)
-                     	 .enter()
-                         .append('path')
-                         .attr('d', path)
-                         .style("fill", "rgb(186,202,198)")
-                         .style("stroke","rgb(255,255,255)")
-                         .style("stroke-width", 0.5);
+         var path = d3.geoPath().projection(scale(0.65));     
 
 
-		
+         var map = svg.append("g")
+                      .attr("class", "states")
+                      .selectAll("path")
+                      .data(topojson.feature(us, us.objects.states).features)
+                      .enter()
+                      .append("path")
+                      .attr("d", path);
 
+                   svg.append("path")
+                      .attr("class", "state-borders")
+                      .attr("d", path(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })));
 
-		} // function draw ends
-		
+    }; // draw function ends
 
 	</script>
-
-
 </head>
 
 <body>
 	<script type="text/javascript">
 		/* Load the Geo JSON file */
-		d3.json("us_states_main.json", draw);
+		d3.json("us_topo.json", draw);
 
 	</script>
-	
 </body>
-
 </html>
