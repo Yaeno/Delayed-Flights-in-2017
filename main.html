@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<script src = "http://d3js.org/d3.v4.min.js"></script>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://d3js.org/d3.v4.min.js"></script>
   <script src="https://d3js.org/topojson.v2.min.js"></script>
-	<style type="text/css">
-		
+  <script src="https://d3js.org/d3-array.v1.min.js"></script>
+  <script src="https://d3js.org/d3-geo.v1.min.js"></script>
+  <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+  <style type="text/css">
+
   .states {
     fill: rgb(186,202,198);
   }
@@ -25,10 +29,9 @@
 
   .map{
     position: fixed;
-    left:24px;
-    top: 300px;
+    left:3.0em;
+    top: 18em;
   }
-
 
   .header{
      width: 620px;
@@ -40,9 +43,13 @@
      top: 36px;
   }
 
-	</style>
+  .bubble{
+    fill:rgba(83,95,110,0.8);
+  }
 
-	
+  </style>
+
+
   <script type="text/javascript">
 
 
@@ -57,10 +64,10 @@
 
 
     /*--------- Visualize Data ----------*/
-    
+
     function draw(us){
 
-			
+
        /* add a header */
 
          d3.select("body")
@@ -68,19 +75,26 @@
            .attr("class", "header")
            .text("Delayed Flights in 2017");
 
-      
+
        /* add a SVG map */
-         
+
+         var width = 960;
+         var height = 500;
+
          var svg = d3.select("body")
             .append("svg")
-            .attr("width", 960)
-            .attr("height", 500)
+            .attr("width", width)
+            .attr("height", height)
             .attr('class', 'map');
 
          var svg = d3.select("svg");
 
-
-         var path = d3.geoPath().projection(scale(0.65));     
+         var projection = d3.geoAlbersUsa()
+                    .scale(821)
+                    .translate([width/3-10,height/2-55]);
+                    
+                            
+         var path = d3.geoPath().projection(scale(0.65));
 
 
          var map = svg.append("g")
@@ -95,16 +109,99 @@
                       .attr("class", "state-borders")
                       .attr("d", path(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; })));
 
+         
+          /* -----------  Plot Points on US Map -----------------*/
+
+
+          //load csv and transfer the value of arr_del15 to an integer. 
+          d3.csv("airline_delay_2017.csv",plot_points);
+
+          
+          function plot_points(data){
+              
+              //debugger; 
+              //use this debugger to test whether the data has passed to the plot_points
+
+              var nested = d3.nest()
+                             .key(function(d){
+                                return d.airport_name;
+                             })
+                             .rollup(function(leaves){
+
+                                  var totalDelayed = d3.sum(leaves, function(d){
+                                    return +d.arr_del15;
+                                  });
+
+                                  //debugger;
+
+                                  var coords = leaves.map(function(d){
+                                    return projection ([+d.long, +d.lat]);
+                                  });
+
+                                 // debugger;
+
+                                  var center_x = d3.mean(coords, function(d){
+                                      return d[0];
+                                  });
+
+                                  //debugger;
+
+                                  var center_y = d3.mean(coords, function(d){
+                                       return d[1];
+                                   });
+
+                                 // debugger;
+
+                                   return{
+                                      'delayed': totalDelayed,
+                                      'x': center_x,
+                                      'y': center_y
+                                   };
+                             })
+
+                             .entries(data);
+                             
+                             //debugger; // This is used to test the nested function.  The console will present 30 objects including the parameters of totalDelayed, x, and y.
+
+
+             /*Draw*/
+
+              /* Step2 - Set the size of circles */
+              var delayed_max = d3.max(nested, function(d){
+                  return d.value['delayed'];
+              });
+
+              var radius = d3.scale.sqrt()
+                                   .domain([0, delayed_max])
+                                   .range([0,12]);
+
+             /* Step1 - Add Circles */
+             svg.append('g')
+                .attr("class", "bubble")
+                .selectAll("circle")
+                .data(nested)
+                .enter()
+                .append("circle")
+                .attr('cx', function(d){return (d.value['x']);})
+                .attr('cy', function(d){return (d.value['y']);})
+                .attr('r', function(d){return radius(d.value['delayed']);});
+
+          }; // plot_points ends
+
+
+
+
+
     }; // draw function ends
 
-	</script>
+  </script>
 </head>
 
 <body>
-	<script type="text/javascript">
-		/* Load the Geo JSON file */
-		d3.json("us_topo.json", draw);
+  <script type="text/javascript">
+    /* Load the Geo JSON file */
+    d3.json("us_topo.json", draw);
 
-	</script>
+  </script>
 </body>
 </html>
