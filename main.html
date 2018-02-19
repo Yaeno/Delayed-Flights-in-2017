@@ -5,17 +5,14 @@
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="http://d3js.org/d3.v4.min.js"></script>
   <script src="https://d3js.org/topojson.v2.min.js"></script>
-  <script src="https://d3js.org/d3-array.v1.min.js"></script>
-  <script src="https://d3js.org/d3-geo.v1.min.js"></script>
-  <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+  <script src="d3-tip.js"></script>
+ 
+  
+ 
   <style type="text/css">
 
   .states {
     fill: rgb(186,202,198);
-  }
-
-  .states :hover {
-    fill: red;
   }
 
   .state-borders {
@@ -34,18 +31,64 @@
   }
 
   .header{
-     width: 620px;
+     width: 730px;
      text-align: center;
      color: black;
      font-family: "Roboto";
      font-size: 36px;
      position: fixed;
-     top: 36px;
+     top: 28px;
   }
 
   .bubble{
     fill:rgba(83,95,110,0.8);
   }
+
+  /* Tooltip CSS */
+  .map_Tip {
+    line-height: 1;
+    padding: 8px;
+    background: rgba(72, 84, 101, 0.9);
+    border-radius: 1px;
+    pointer-events: none;
+    }
+
+    /*Create a triangle arrow (v) for the tooltip.*/
+   .map_Tip:after {      
+      box-sizing: border-box;
+      display: inline;
+      font-size: 9px;
+      width: 100%;
+      line-height: 1;
+      color: rgba(72, 84, 101, 0.9);
+      position: absolute;
+      pointer-events: none;
+    }
+
+    /* Northward tooltips */
+    .map_Tip.n:after {
+      content: "\25BC";
+      margin: -1px 0 0 0;
+      top: 100%;
+      left: 0;
+      text-align: center;
+    }
+
+
+    .tipLabel{
+      color: rgba(255,255,255,0.4);
+      font-family: Roboto;
+      font-size: 11px;
+      /*font-weight: medium;*/
+    }
+
+    .tipValue{
+      color:white;
+      font-family: Roboto;
+      font-size: 11px;
+      font-weight: medium;
+      
+    }
 
   </style>
 
@@ -88,6 +131,7 @@
             .attr('class', 'map');
 
          var svg = d3.select("svg");
+
 
          var projection = d3.geoAlbersUsa()
                     .scale(821)
@@ -132,28 +176,40 @@
                                     return +d.arr_del15;
                                   });
 
-                                  //debugger;
-
                                   var coords = leaves.map(function(d){
                                     return projection ([+d.long, +d.lat]);
                                   });
-
-                                 // debugger;
 
                                   var center_x = d3.mean(coords, function(d){
                                       return d[0];
                                   });
 
-                                  //debugger;
-
                                   var center_y = d3.mean(coords, function(d){
                                        return d[1];
                                    });
 
-                                 // debugger;
+                                  /* Add the parameters for tooltip except for totalDelayed*/
+                                  var totalArrival = d3.sum(leaves, function(d){
+                                    return +d.arr_flights;
+                                  });
 
-                                   return{
+                                  var delayedRatio = totalDelayed / totalArrival;
+
+                                  var ratioPercentage = d3.format(".0%")(delayedRatio);
+
+                                  var airportNames = d3.set();
+                                  leaves.forEach(function(d){airportNames.add(d.airport);});
+
+                                  var stateNames = d3.set();
+                                  leaves.forEach(function(d){stateNames.add(d.state);});
+
+                                  return{
+                                      'arrival': totalArrival,
                                       'delayed': totalDelayed,
+                                      'ratio': delayedRatio,
+                                      'percentage': ratioPercentage,
+                                      'airport': airportNames.values()[0],
+                                      'state': stateNames.values()[0],
                                       'x': center_x,
                                       'y': center_y
                                    };
@@ -164,16 +220,32 @@
                              //debugger; // This is used to test the nested function.  The console will present 30 objects including the parameters of totalDelayed, x, and y.
 
 
-             /*Draw*/
+              /*Draw*/
 
               /* Step2 - Set the size of circles */
-              var delayed_max = d3.max(nested, function(d){
-                  return d.value['delayed'];
+              var ratio_max = d3.max(nested, function(d){
+                  return d.value['ratio'];
               });
 
               var radius = d3.scale.sqrt()
-                                   .domain([0, delayed_max])
+                                   .domain([0, ratio_max])
                                    .range([0,12]);
+
+             /* Step3 - Declare a variable to store the map-tip element. */
+              var mapTip = d3.tip()
+                 .attr('class','map_Tip')
+                 .offset([-10,0])
+                 .html(function(d){ 
+                    return "<span class = 'tipLabel'>Delayed%: </span><span class='tipValue'>" + "&nbsp" + d.value['percentage'] + "<br></span>"
+                  + "<span class = 'tipLabel'>Delayed: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp&nbsp" + d3.format(",.2r")(d.value['delayed']) + "<br></span>"
+                  + "<span class = 'tipLabel'>Total: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" + d3.format(",.2r")(d.value['arrival']) + "<br></span>" 
+                  + "<span class = 'tipLabel'>Airport: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" + d.value['airport'] + "<br></span>"
+                  + "<span class = 'tipLabel'>State: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" + d.value['state'] + "<br></span>";
+                 });
+
+             //debugger;
+
+             svg.call(mapTip);
 
              /* Step1 - Add Circles */
              svg.append('g')
@@ -184,12 +256,27 @@
                 .append("circle")
                 .attr('cx', function(d){return (d.value['x']);})
                 .attr('cy', function(d){return (d.value['y']);})
-                .attr('r', function(d){return radius(d.value['delayed']);});
+                .attr('r', function(d){return radius(d.value['ratio']);})
+                /*Tooltip*/
+                .style('stroke-width', 0.3)
+                .on('mouseover',function(d){ 
+                        mapTip.show(d);
+                        d3.select(this)
+                          .style("opacity", 1)
+                          .style("stroke","white")
+                          .style("stroke-width",3);
+                 })
+                .on('mouseout', function(d){
+                        mapTip.hide(d);
+                        d3.select(this)
+                          .style("opacity", 0.8)
+                          .style("stroke","white")
+                          .style("stroke-width",0.3);
+               });
+
+             /* Add Tooltips*/
 
           }; // plot_points ends
-
-
-
 
 
     }; // draw function ends
