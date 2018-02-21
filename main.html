@@ -35,9 +35,21 @@
      text-align: center;
      color: black;
      font-family: "Roboto";
+     font-weight: lighter;
      font-size: 36px;
      position: fixed;
-     top: 28px;
+     top: 48px;
+  }
+
+  .fullAirportName{
+     width: 730px;
+     text-align: center;
+     color: rgba(255,126,103,1);
+     font-family: "Roboto";
+     font-weight: 400;
+     font-size: 24px;
+     position: fixed;
+     top: 156px;
   }
 
   .bubble{
@@ -68,7 +80,7 @@
     /* Northward tooltips */
     .map_Tip.n:after {
       content: "\25BC";
-      margin: -1px 0 0 0;
+      margin: 0 0 0 0;
       top: 100%;
       left: 0;
       text-align: center;
@@ -112,16 +124,23 @@
 
 
        /* add a header */
-
          d3.select("body")
-           .append("p")
+           .append("h1")
            .attr("class", "header")
            .text("Delayed Flights in 2017");
+
+       /* add a full name of airport */
+               /*Add Header*/
+        d3.select("body")
+          .append("h2")
+          .attr("class", "fullAirportName")
+          .text("Select an aiport in the map");
+       
 
 
        /* add a SVG map */
 
-         var width = 960;
+         var width = 652;
          var height = 500;
 
          var svg = d3.select("body")
@@ -135,7 +154,7 @@
 
          var projection = d3.geoAlbersUsa()
                     .scale(821)
-                    .translate([width/3-10,height/2-55]);
+                    .translate([width/2-15,height/2-55]);
                     
                             
          var path = d3.geoPath().projection(scale(0.65));
@@ -165,6 +184,8 @@
               
               //debugger; 
               //use this debugger to test whether the data has passed to the plot_points
+
+              /* ------- Wrap data for each circle----------- */
 
               var nested = d3.nest()
                              .key(function(d){
@@ -200,6 +221,12 @@
                                   var airportNames = d3.set();
                                   leaves.forEach(function(d){airportNames.add(d.airport);});
 
+                                  var airportFullNames = d3.set();
+                                  leaves.forEach(function(d){airportFullNames.add(d.airport_name);});
+
+                                  var cities = d3.set();
+                                  leaves.forEach(function(d){cities.add(d.city);});
+
                                   var stateNames = d3.set();
                                   leaves.forEach(function(d){stateNames.add(d.state);});
 
@@ -209,6 +236,8 @@
                                       'ratio': delayedRatio,
                                       'percentage': ratioPercentage,
                                       'airport': airportNames.values()[0],
+                                      'airportFull': airportFullNames.values()[0],
+                                      'city': cities.values()[0],
                                       'state': stateNames.values()[0],
                                       'x': center_x,
                                       'y': center_y
@@ -219,8 +248,27 @@
                              
                              //debugger; // This is used to test the nested function.  The console will present 30 objects including the parameters of totalDelayed, x, and y.
 
+              
+              /* ------- Functions to draw map and charts----------- */
+              
 
-              /*Draw*/
+              /* A function to bring element to the front*/
+              d3.selection.prototype.moveToFront = function() {
+                  return this.each(function(){
+                         this.parentNode.appendChild(this);
+                        });
+              };
+
+              function update(aiport_name){
+
+
+                  /* update airport name*/
+                  d3.select("h2")
+                    .text(aiport_name.value['airportFull']);
+
+              }; // function update ends
+
+              /* --------------------- Draw -------------------------*/
 
               /* Step2 - Set the size of circles */
               var ratio_max = d3.max(nested, function(d){
@@ -240,6 +288,7 @@
                   + "<span class = 'tipLabel'>Delayed: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp&nbsp" + d3.format(",.2r")(d.value['delayed']) + "<br></span>"
                   + "<span class = 'tipLabel'>Total: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" + d3.format(",.2r")(d.value['arrival']) + "<br></span>" 
                   + "<span class = 'tipLabel'>Airport: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" + d.value['airport'] + "<br></span>"
+                  + "<span class = 'tipLabel'>City: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" + d.value['city'] + "<br></span>"
                   + "<span class = 'tipLabel'>State: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" + d.value['state'] + "<br></span>";
                  });
 
@@ -270,11 +319,31 @@
                         mapTip.hide(d);
                         d3.select(this)
                           .style("opacity", 0.8)
-                          .style("stroke","white")
-                          .style("stroke-width",0.3);
-               });
+                         // .style("stroke","white")
+                          .style("stroke-width", 0);
+                 })
+                .on('click', function(d){
 
-             /* Add Tooltips*/
+                        /* set all bubbles to the initial states*/
+                        d3.select(".bubble")
+                          .selectAll("circle")
+                          .style("fill", "rgba(83,95,110,0.8)")
+                          .style("background", "rgba(83,95,110,0.8)");
+
+
+                        /* turn this circle to the highlighted color */
+                        d3.select(this)
+                          .moveToFront()
+                          .style("opacity",1)
+                          .style("fill","rgba(255,126,103,1)")
+                          .style("stroke", "rgba(255,126,103,1)")
+                          .style("stroke-width",3);
+
+                        /* call update function */
+                        update(d);
+                        //debugger;
+
+                });
 
           }; // plot_points ends
 
