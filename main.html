@@ -102,6 +102,8 @@
       
     }
 
+
+
   </style>
 
 
@@ -121,6 +123,13 @@
     /*--------- Visualize Data ----------*/
 
     function draw(us){
+
+        /* add a left-background */
+         d3.select("body")
+           .append("svg")
+           .attr("width", 730)
+           .attr("height",800)
+           .style("background-color", "#F9F9F9");
 
 
        /* add a header */
@@ -143,13 +152,14 @@
          var width = 652;
          var height = 500;
 
+
          var svg = d3.select("body")
             .append("svg")
             .attr("width", width)
             .attr("height", height)
             .attr('class', 'map');
 
-         var svg = d3.select("svg");
+         var svg = d3.select(".map");
 
 
          var projection = d3.geoAlbersUsa()
@@ -261,11 +271,9 @@
 
               function update(aiport_name){
 
-
                   /* update airport name*/
                   d3.select("h2")
                     .text(aiport_name.value['airportFull']);
-
               }; // function update ends
 
               /* --------------------- Draw -------------------------*/
@@ -319,7 +327,6 @@
                         mapTip.hide(d);
                         d3.select(this)
                           .style("opacity", 0.8)
-                         // .style("stroke","white")
                           .style("stroke-width", 0);
                  })
                 .on('click', function(d){
@@ -342,11 +349,9 @@
                         /* call update function */
                         update(d);
                         //debugger;
-
                 });
 
           }; // plot_points ends
-
 
     }; // draw function ends
 
