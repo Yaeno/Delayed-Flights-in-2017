@@ -11,61 +11,83 @@
  
   <style type="text/css">
 
-  .states {
-    fill: rgb(186,202,198);
-  }
+    .states {
+      fill: rgba(186,202,198,1);
+   }
 
-  .state-borders {
-    fill: none;
-    stroke: #fff;
-    stroke-width: .8px;
-    stroke-linejoin: round;
-    stroke-linecap: round;
-    pointer-events: none;
-  }
+    .state-borders {
+      fill: none;
+      stroke: #fff;
+      stroke-width: .8px;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      pointer-events: none;
+   }
 
-  .map{
-    position: fixed;
-    left:3.0em;
-    top: 18em;
-  }
-
-  .header{
-     width: 730px;
-     text-align: center;
-     color: black;
-     font-family: "Roboto";
-     font-weight: lighter;
-     font-size: 36px;
+    .map{
      position: fixed;
-     top: 48px;
-  }
+     left:3.0em;
+     top: 18em;
+   }
 
-  .fullAirportName{
-     width: 730px;
-     text-align: center;
-     color: rgba(255,126,103,1);
-     font-family: "Roboto";
-     font-weight: 400;
-     font-size: 24px;
-     position: fixed;
-     top: 156px;
-  }
+    .header{
+      width: 730px;
+      text-align: center;
+      color: black;
+      font-family: "Roboto";
+      font-weight: lighter;
+      font-size: 36px;
+      position: fixed;
+      top: 48px;
+   }
 
-  .bubble{
-    fill:rgba(83,95,110,0.8);
-  }
+   .fullAirportName{
+      width: 730px;
+      text-align: center;
+      color: rgba(255,126,103,1);
+      font-family: "Roboto";
+      font-weight: 400;
+      font-size: 24px;
+      position: fixed;
+      top: 156px;
+   }
 
-  /* Tooltip CSS */
-  .map_Tip {
-    line-height: 1;
-    padding: 8px;
-    background: rgba(72, 84, 101, 0.9);
-    border-radius: 1px;
-    pointer-events: none;
-    }
+   .mainTexts{
+      width: 550px;
+      text-align: center;
+      font-family: "Roboto";
+      position: fixed;
+      line-height: 65px;
+      top: 137px;
+      left:731px;
+   }
 
-    /*Create a triangle arrow (v) for the tooltip.*/
+   .highlighted{
+      color: rgba(255,126,103,1);
+      font-weight: 600;
+      font-size: 44px;
+   }
+
+   .unhighlighted{
+      color: rgba(134,158,153,1);
+      font-weight: 300;
+      font-size: 24px;
+   }
+
+   .bubble{
+      fill:rgba(83,95,110,0.8);
+   }
+
+   /* Tooltip CSS */
+   .map_Tip {
+      line-height: 1;
+      padding: 8px;
+      background: rgba(72, 84, 101, 0.9);
+      border-radius: 1px;
+      pointer-events: none;
+   }
+
+   /*Create a triangle arrow (v) for the tooltip.*/
    .map_Tip:after {      
       box-sizing: border-box;
       display: inline;
@@ -75,33 +97,30 @@
       color: rgba(72, 84, 101, 0.9);
       position: absolute;
       pointer-events: none;
-    }
+   }
 
-    /* Northward tooltips */
-    .map_Tip.n:after {
+   /* Northward tooltips */
+   .map_Tip.n:after {
       content: "\25BC";
       margin: 0 0 0 0;
       top: 100%;
       left: 0;
       text-align: center;
-    }
+   }
 
 
-    .tipLabel{
+   .tipLabel{
       color: rgba(255,255,255,0.4);
       font-family: Roboto;
       font-size: 11px;
-      /*font-weight: medium;*/
-    }
+   }
 
-    .tipValue{
+   .tipValue{
       color:white;
       font-family: Roboto;
       font-size: 11px;
       font-weight: medium;
-      
-    }
-
+  }
 
 
   </style>
@@ -139,11 +158,16 @@
            .text("Delayed Flights in 2017");
 
        /* add a full name of airport */
-               /*Add Header*/
         d3.select("body")
           .append("h2")
           .attr("class", "fullAirportName")
           .text("Select an aiport in the map");
+
+        /* add main explainary text */
+        d3.select("body")
+          .append("h2")
+          .attr("class", "mainTexts")
+          .html(" ");
        
 
 
@@ -269,11 +293,16 @@
                         });
               };
 
-              function update(aiport_name){
+              function update(airport){
 
                   /* update airport name*/
-                  d3.select("h2")
-                    .text(aiport_name.value['airportFull']);
+                  d3.select(".fullAirportName")
+                    .text(airport.value['airportFull']);
+
+
+                  d3.select(".mainTexts") 
+                    .html("<span class = 'highlighted'>" + airport.value['percentage'] + "</span>" +  "<span class = 'unhighlighted'> of flights were delayed, <br> mainly caused by, <br></span> <span class = 'highlighted'> Diverted Flights </span>" );
+
               }; // function update ends
 
               /* --------------------- Draw -------------------------*/
@@ -360,6 +389,7 @@
 
 <body>
   <script type="text/javascript">
+    
     /* Load the Geo JSON file */
     d3.json("us_topo.json", draw);
 
