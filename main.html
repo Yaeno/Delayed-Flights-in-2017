@@ -27,8 +27,30 @@
     .map{
      position: fixed;
      left:3.0em;
-     top: 18em;
+     top: 17em;
    }
+
+    .barChart{
+     position: fixed;
+     left: 731px;
+     top: 350px;
+   }
+
+    .axis{
+      font-family: Roboto;
+      font-weight: 300;
+      font-size: 9px;
+      :red;
+    }
+
+    .axis text{
+      fill:rgba(83,95,110,0.8);
+    }
+
+    .axis line{
+      stroke: rgba(231,235,239,1);
+    }
+
 
     .header{
       width: 730px;
@@ -57,7 +79,7 @@
       text-align: center;
       font-family: "Roboto";
       position: fixed;
-      line-height: 65px;
+      line-height: 60px;
       top: 137px;
       left:731px;
    }
@@ -69,7 +91,7 @@
    }
 
    .unhighlighted{
-      color: rgba(134,158,153,1);
+      color: rgba(83,95,110,0.8);
       font-weight: 300;
       font-size: 24px;
    }
@@ -223,7 +245,7 @@
 
               var nested = d3.nest()
                              .key(function(d){
-                                return d.airport_name;
+                                return d.airport;
                              })
                              .rollup(function(leaves){
 
@@ -264,6 +286,38 @@
                                   var stateNames = d3.set();
                                   leaves.forEach(function(d){stateNames.add(d.state);});
 
+                                  
+                                  /* Add delayed causes */
+
+                                  var totalCarrier = d3.sum(leaves, function(d){
+                                    return +d.carrier;
+                                  });
+
+                                  var totalWeather = d3.sum(leaves, function(d){
+                                    return +d.weather;
+                                  });
+
+                                  var totalNAS = d3.sum(leaves, function(d){
+                                    return +d.national_air_service;
+                                  });
+
+                                  var totalSecurity = d3.sum(leaves, function(d){
+                                    return +d.security;
+                                  });
+
+                                  var totalLateAircraft = d3.sum(leaves, function(d){
+                                    return +d.late_aircraft;
+                                  });
+
+                                  var totalCancelledArrival = d3.sum(leaves, function(d){
+                                    return +d.cancelled_arrival;
+                                  });
+
+                                  var totalDivertedArrival = d3.sum(leaves, function(d){
+                                    return +d.diverted_arrival;
+                                  });
+
+
                                   return{
                                       'arrival': totalArrival,
                                       'delayed': totalDelayed,
@@ -273,6 +327,13 @@
                                       'airportFull': airportFullNames.values()[0],
                                       'city': cities.values()[0],
                                       'state': stateNames.values()[0],
+                                      'cos_carrier': totalCarrier,
+                                      'cos_weather': totalWeather,
+                                      'cos_nas': totalNAS,
+                                      'cos_security': totalSecurity,
+                                      'cos_lateAircraft': totalLateAircraft,
+                                      'cos_cancelledArrival': totalCancelledArrival,
+                                      'cos_divertedArrival': totalDivertedArrival,
                                       'x': center_x,
                                       'y': center_y
                                    };
@@ -283,27 +344,6 @@
                              //debugger; // This is used to test the nested function.  The console will present 30 objects including the parameters of totalDelayed, x, and y.
 
               
-              /* ------- Functions to draw map and charts----------- */
-              
-
-              /* A function to bring element to the front*/
-              d3.selection.prototype.moveToFront = function() {
-                  return this.each(function(){
-                         this.parentNode.appendChild(this);
-                        });
-              };
-
-              function update(airport){
-
-                  /* update airport name*/
-                  d3.select(".fullAirportName")
-                    .text(airport.value['airportFull']);
-
-
-                  d3.select(".mainTexts") 
-                    .html("<span class = 'highlighted'>" + airport.value['percentage'] + "</span>" +  "<span class = 'unhighlighted'> of flights were delayed, <br> mainly caused by, <br></span> <span class = 'highlighted'> Diverted Flights </span>" );
-
-              }; // function update ends
 
               /* --------------------- Draw -------------------------*/
 
@@ -315,6 +355,11 @@
               var radius = d3.scale.sqrt()
                                    .domain([0, ratio_max])
                                    .range([0,12]);
+
+              // return the key
+              function key_func(d){
+                  return d['key'];
+              };
 
              /* Step3 - Declare a variable to store the map-tip element. */
               var mapTip = d3.tip()
@@ -337,7 +382,7 @@
              svg.append('g')
                 .attr("class", "bubble")
                 .selectAll("circle")
-                .data(nested)
+                .data(nested,key_func)
                 .enter()
                 .append("circle")
                 .attr('cx', function(d){return (d.value['x']);})
@@ -376,9 +421,165 @@
                           .style("stroke-width",3);
 
                         /* call update function */
-                        update(d);
+                        update(d['key']);
                         //debugger;
                 });
+
+
+             /* ------- Functions to draw map and charts----------- */
+              
+
+             /* A function to bring element to the front*/
+             d3.selection.prototype.moveToFront = function() {
+                 return this.each(function(){
+                        this.parentNode.appendChild(this);
+                      });
+             };
+
+             function update(airport){
+
+                 d3.select(".barChart").remove();
+
+                 /* filter the information of the given airport*/
+                   var filtered = nested.filter(function(d){
+                     return d['key'] === airport;
+                   });
+
+                   //debugger;
+
+                 /* update airport name*/
+                   d3.select(".fullAirportName")
+                     .text(filtered[0].value['airportFull']);
+
+
+                   d3.select(".mainTexts") 
+                     .html("<span class = 'highlighted'>" + filtered[0].value['percentage'] + "</span>" +  "<span class = 'unhighlighted'> of flights were delayed, <br> mainly caused by, <br></span> <span class = 'highlighted'> Air Traffic </span>" );
+
+                  /* create a data set */
+                  var barDataSet = [{"cause": "carrier", "amount": filtered[0].value['cos_carrier']}, 
+                                    {"cause": "weather", "amount": filtered[0].value['cos_weather']},
+                                    {"cause": "air traffic", "amount": filtered[0].value['cos_nas']},
+                                    {"cause": "security", "amount": filtered[0].value['cos_security']},
+                                    {"cause": "late aircraft", "amount":filtered[0].value['cos_lateAircraft']},
+                                    {"cause": "canceled arrival", "amount": filtered[0].value['cos_cancelledArrival']},
+                                    {"cause": "diverted arrival", "amount": filtered[0].value['cos_divertedArrival']}
+                                   ]
+                  //debugger;
+
+                  /* --------------- Make a bar Chart ----------*/
+                  /* set the dimensions and margins of the graph*/
+                  var bar_margin = {top: 54, right: 0, bottom:48, left: 84},
+                      bar_width = 504 - bar_margin.left - bar_margin.right,
+                      bar_height = 324 - bar_margin.top - bar_margin.bottom,
+                      bar_padding = 24;
+
+                  /* -- set domains and ranges -- */
+                  /* create a scale set for x-axis based on cause*/
+                  var xScale = d3.scaleBand()
+                                 .domain(barDataSet.map(function(d){
+                                    return d.cause;
+                                 }))
+                                 .rangeRound([0, bar_width])
+                                 .padding(0.1);
+
+                  /* create a scale set for y-axis based on amount*/
+                  var yScale = d3.scaleLinear()
+                                 .domain([0,d3.max(barDataSet,function(d){
+                                    return +d.amount;
+                                 })])
+                                 .range([bar_height,0]);
+
+                  /* create x axis*/
+                  var xAxis = d3.axisBottom(xScale);
+
+                  /* create y axis*/
+                  var yAxis = d3.axisLeft(yScale)
+                                .tickSize(-bar_width)
+                                .ticks(8);
+
+
+                  /*-- create the svg object of bar chart to the body  --*/
+
+                  var barChart = d3.select("body")
+                                   .append("svg")
+                                   .attr("width", bar_width  + bar_margin.left + bar_margin.right )
+                                   .attr("height", bar_height  + bar_margin.top + bar_margin.bottom )
+                                   .attr('class', 'barChart')
+                                   /*append a 'group' to barChart svg*/
+                                   .append("g") 
+                                   /*moves the 'group' element to the top left margin*/
+                                   .attr("transform", "translate(" + bar_margin.left + "," + bar_margin.top + ")");
+                   
+
+                   /* -- add axises to barChart -- */  
+
+                   barChart.append("g")
+                           .attr("class", "axis")
+                           .attr("transform", "translate(0," + bar_height + ")")
+                           .call(customXAxis)
+                           .selectAll(".tick text")
+                           .call(wrap, (bar_width / barDataSet.length) - bar_padding);  
+
+                   barChart.append("g")
+                           .attr('class', "axis")
+                           .call(customYAxis);
+
+                    function customXAxis(g) {
+                            g.call(xAxis);
+                            g.select(".domain").remove();
+                    }
+
+                    function customYAxis(g) {
+                            g.call(yAxis);
+                            g.select(".domain").remove();
+                            g.selectAll(".tick:not(:first-of-type) line")
+                             .attr("stroke", "#E7EBEF")
+                             .attr("stroke-dasharray", "2,2");
+                            g.selectAll(".tick text").attr("x", -15).attr("dy", 0);
+                    }
+
+                    function wrap(text, width) {
+                        text.each(function() {
+                          var text = d3.select(this),
+                           words = text.text().split(/\s+/).reverse(),
+                           word,
+                           line = [],
+                           lineNumber = 0,
+                           lineHeight = 1.1, // ems
+                           y = text.attr("y"),
+                           dy = parseFloat(text.attr("dy")),
+                           tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+                        while (word = words.pop()) {
+                           line.push(word);
+                           tspan.text(line.join(" "));
+                           if (tspan.node().getComputedTextLength() > width) {
+                              line.pop();
+                              tspan.text(line.join(" "));
+                              line = [word];
+                              tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                              }
+                        }
+                    })}//end of wrap text function
+
+
+                  /* -- bind data to barChart -- */
+                  barChart.selectAll('rect')
+                          .data(barDataSet)
+                          .enter()
+                          .append('rect')
+                          /* place and style each bar*/
+                          /* place the order horizontally based on causes and the width of barchart */
+                          .attr('x', function(d,i){return xScale(d.cause) + 6;})
+                          /* place vertically based on scale*/
+                          .attr('y',function(d,i){return yScale(d.amount);})
+                          .attr('width', (bar_width / barDataSet.length) - bar_padding)
+                          .attr('height', function(d,i){return bar_height - yScale(d.amount);})
+                          .attr('fill',"rgba(186,202,198,1)");   
+
+              }; // function update ends
+
+              //debugger;
+              //update("ATL");
 
           }; // plot_points ends
 
