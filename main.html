@@ -6,6 +6,9 @@
   <script src="http://d3js.org/d3.v4.min.js"></script>
   <script src="https://d3js.org/topojson.v2.min.js"></script>
   <script src="d3-tip.js"></script>
+ 
+  
+ 
   <style type="text/css">
 
     .states {
@@ -30,7 +33,7 @@
     .barChart{
      position: fixed;
      left: 731px;
-     top: 350px;
+     top: 365px;
    }
 
     .axis{
@@ -48,6 +51,11 @@
       stroke: rgba(231,235,239,1);
     }
 
+    .max{
+      fill: rgba(255,126,103,1);
+    }
+
+    /* -- texts on the left panels -- */
 
     .header{
       width: 730px;
@@ -71,6 +79,20 @@
       top: 156px;
    }
 
+   #mapDescription{
+      width: 730px;
+      text-align: center;
+      color: rgba(83,95,110,0.5);
+      font-family: "Roboto";
+      font-weight: 300;
+      font-size: 14px;
+      position: fixed;
+      top: 700px;
+   }
+ 
+
+   /* -- texts on the right panel --*/
+
    .mainTexts{
       width: 550px;
       text-align: center;
@@ -93,12 +115,26 @@
       font-size: 24px;
    }
 
+   #barDescription{
+      width: 550px;
+      text-align: center;
+      color: rgba(83,95,110,0.5);
+      font-family: "Roboto";
+      font-weight: 300;
+      font-size: 14px;
+      position: fixed;
+      left: 731px;
+      top: 700px;
+   }
+
+   /* -- styles on the map --*/
+
    .bubble{
       fill:rgba(83,95,110,0.8);
    }
 
    /* Tooltip CSS */
-   .map_Tip {
+   .tip{
       line-height: 1;
       padding: 8px;
       background: rgba(72, 84, 101, 0.9);
@@ -107,7 +143,7 @@
    }
 
    /*Create a triangle arrow (v) for the tooltip.*/
-   .map_Tip:after {      
+   .tip:after {      
       box-sizing: border-box;
       display: inline;
       font-size: 9px;
@@ -118,8 +154,9 @@
       pointer-events: none;
    }
 
+
    /* Northward tooltips */
-   .map_Tip.n:after {
+   .tip.n:after {
       content: "\25BC";
       margin: 0 0 0 0;
       top: 100%;
@@ -147,6 +184,7 @@
 
   <script type="text/javascript">
 
+
     /*-----Scale the Map ----------*/
     function scale (scaleFactor) {
         return d3.geoTransform({
@@ -156,6 +194,7 @@
         });
     }; // scale function ends
 
+
     /*--------- Visualize Data ----------*/
 
     function draw(us){
@@ -164,7 +203,7 @@
          d3.select("body")
            .append("svg")
            .attr("width", 730)
-           .attr("height",800)
+           .attr("height","100vh")
            .style("background-color", "#F9F9F9");
 
 
@@ -185,7 +224,17 @@
           .append("h2")
           .attr("class", "mainTexts")
           .html(" ");
-       
+
+
+        /* add map description */
+        d3.select("body")
+          .append("p")
+          .attr("class", "imageDescription")
+          .attr("id", "mapDescription")
+          .text("Delayed Arrivals across 30 Major Airports in U.S.");
+
+
+
        /* add a SVG map */
 
          var width = 652;
@@ -338,12 +387,13 @@
 
               
 
-              /* --------------------- Draw -------------------------*/
+              /* --------------------- Draw Map -------------------------*/
 
               /* Step2 - Set the size of circles */
               var ratio_max = d3.max(nested, function(d){
                   return d.value['ratio'];
               });
+
 
               var radius = d3.scale.sqrt()
                                    .domain([0, ratio_max])
@@ -354,9 +404,10 @@
                   return d['key'];
               };
 
-             /* Step3 - Declare a variable to store the map-tip element. */
+             /* Step3 - Declare a variable to store the map-tip elements. */
               var mapTip = d3.tip()
-                 .attr('class','map_Tip')
+                 .attr('class','tip')
+                 .attr('id','map_Tip')
                  .offset([-10,0])
                  .html(function(d){ 
                     return "<span class = 'tipLabel'>Delayed%: </span><span class='tipValue'>" + "&nbsp" + d.value['percentage'] + "<br></span>"
@@ -419,7 +470,8 @@
                 });
 
 
-             /* ------- Functions to draw map and charts----------- */
+
+             /* ------- Functions to update map and charts----------- */
               
 
              /* A function to bring element to the front*/
@@ -429,9 +481,15 @@
                       });
              };
 
+
+
              function update(airport){
 
-                 d3.select(".barChart").remove();
+               /*remove bar chart data */
+
+                   d3.select(".barChart").remove();
+                   d3.select("#bar_Tip").remove();
+                   d3.select("#barDescription").remove();
 
                  /* filter the information of the given airport*/
                    var filtered = nested.filter(function(d){
@@ -440,24 +498,42 @@
 
                    //debugger;
 
-                 /* update airport name*/
-                   d3.select(".fullAirportName")
-                     .text(filtered[0].value['airportFull']);
-
-
-                   d3.select(".mainTexts") 
-                     .html("<span class = 'highlighted'>" + filtered[0].value['percentage'] + "</span>" +  "<span class = 'unhighlighted'> of flights were delayed, <br> mainly caused by, <br></span> <span class = 'highlighted'> Air Traffic </span>" );
-
-                  /* create a data set */
-                  var barDataSet = [{"cause": "carrier", "amount": filtered[0].value['cos_carrier']}, 
-                                    {"cause": "weather", "amount": filtered[0].value['cos_weather']},
-                                    {"cause": "air traffic", "amount": filtered[0].value['cos_nas']},
-                                    {"cause": "security", "amount": filtered[0].value['cos_security']},
-                                    {"cause": "late aircraft", "amount":filtered[0].value['cos_lateAircraft']},
-                                    {"cause": "canceled arrival", "amount": filtered[0].value['cos_cancelledArrival']},
-                                    {"cause": "diverted arrival", "amount": filtered[0].value['cos_divertedArrival']}
+                   /* create a data set */
+                   var barDataSet = [{"cause": "Carrier", "amount": filtered[0].value['cos_carrier']}, 
+                                    {"cause": "Weather", "amount": filtered[0].value['cos_weather']},
+                                    {"cause": "Air Traffic", "amount": filtered[0].value['cos_nas']},
+                                    {"cause": "Security", "amount": filtered[0].value['cos_security']},
+                                    {"cause": "Late Aircrafts", "amount":filtered[0].value['cos_lateAircraft']},
+                                    {"cause": "Canceled Arrivals", "amount": filtered[0].value['cos_cancelledArrival']},
+                                    {"cause": "Diverted Arrivals", "amount": filtered[0].value['cos_divertedArrival']}
                                    ]
                   //debugger;
+                  
+                  /*fin the biggest amount of */
+                  var maxAmount = d3.max(barDataSet,function(d,i){
+                    return +d.amount;
+                  }) 
+
+                  //debugger;
+
+                  var maxCause = barDataSet.filter(function(d){
+                    if(d.amount === maxAmount){
+                      return d;
+                    }
+                  })
+
+                  //debugger;
+
+                  /*----update main texts------ */    
+
+                  /* update airport name*/
+                  d3.select(".fullAirportName")
+                    .text(filtered[0].value['airportFull']);
+
+
+                  d3.select(".mainTexts") 
+                    .html("<span class = 'highlighted'>" + filtered[0].value['percentage'] + "</span>" +  "<span class = 'unhighlighted'> of " +  d3.format(",.2r")(filtered[0].value['arrival']) + " flights were delayed, <br> mainly caused by, <br></span> <span class = 'highlighted'>" + maxCause[0].cause + "</span>" );    
+                
 
                   /* --------------- Make a bar Chart ----------*/
                   /* set the dimensions and margins of the graph*/
@@ -489,7 +565,7 @@
                   var yAxis = d3.axisLeft(yScale)
                                 .tickSize(-bar_width)
                                 .ticks(8);
-
+  
 
                   /*-- create the svg object of bar chart to the body  --*/
 
@@ -555,6 +631,20 @@
                     })}//end of wrap text function
 
 
+
+                   /* ----- create tool tip ------ */   
+                    var barTip = d3.tip()
+                         .attr('class','tip')
+                         .attr('id','bar_Tip')
+                                 .offset([-10,0])
+                                 .html(function(d){ 
+                      return  "<span class = 'tipLabel'> Delayed: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp" + d3.format(",.2r")(d.amount) + "<br></span>" 
+                      + "<span class = 'tipLabel'> Cause%: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp" + d3.format(".0%")(d.amount / filtered[0].value['delayed']) + "</span>"  
+                  })
+
+                  barChart.call(barTip);    
+
+
                   /* -- bind data to barChart -- */
                   barChart.selectAll('rect')
                           .data(barDataSet)
@@ -562,14 +652,27 @@
                           .append('rect')
                           /* place and style each bar*/
                           /* place the order horizontally based on causes and the width of barchart */
+                          
                           .attr('x', function(d,i){return xScale(d.cause) + 6;})
                           /* place vertically based on scale*/
                           .attr('y',function(d,i){return yScale(d.amount);})
                           .attr('width', (bar_width / barDataSet.length) - bar_padding)
                           .attr('height', function(d,i){return bar_height - yScale(d.amount);})
-                          .attr('fill',"rgba(186,202,198,1)");   
+                          .attr('fill',"rgba(186,202,198,1)")
+                          .on('mouseover', barTip.show)
+                  .on('mouseout', barTip.hide)
+                          /* filter the bar that holds the maximum amount*/
+                          .filter(function(d) { return d.amount === maxAmount; })
+                          /* put the true value, which is the result of filter to the class of max*/
+                .classed("max", true);
 
-              }; // function update ends
+             /* --- add bar chart description --- */
+                  d3.select("body")
+                  .append("p")
+                    .attr("class", "imageDescription")
+                    .attr("id", "barDescription")
+                    .text("Flight Delays by Causes");
+               }; // function update ends
 
               //debugger;
               //update("ATL");
