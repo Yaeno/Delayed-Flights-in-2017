@@ -1,14 +1,17 @@
-# Delayed Flights in 2017
-
-
 ## Synopsis 
 The project is a data visualization telling a story of the delayed flights in 30 major airports across USA in 2017.
+
+## Demo 
+![Demo](demo.gif)
 
 ## Data Resource 
 <a href = "https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp">Bureau of Transportation Statistics </a>
 
 
-## Installation 
+## Loading File Locally
+
+According to <a href="https://github.com/d3/d3/issues/1698">Mike Bostock's comment in 2014</a>, "Chrome disallows XMLHttpReques when running files from the local file system (file:///)".  Due to this limitation, without loading the file via a local server, the US map written in Topo JSON won't display on the screen.
+
 To load the file, you will need to start a local service on your computer.
 
 Step1: Download Python3;</br>
