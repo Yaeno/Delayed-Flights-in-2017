@@ -8,7 +8,6 @@
   <script src="d3-tip.js"></script>
  
   
- 
   <style type="text/css">
 
     .states {
@@ -177,9 +176,8 @@
       font-size: 11px;
       font-weight: medium;
   }
-
-
   </style>
+
 
 
   <script type="text/javascript">
@@ -199,7 +197,7 @@
 
     function draw(us){
 
-        /* add a left-background */
+        /* add the left-background */
          d3.select("body")
            .append("svg")
            .attr("width", 730)
@@ -207,19 +205,19 @@
            .style("background-color", "#F9F9F9");
 
 
-       /* add a header */
+       /* add the header */
          d3.select("body")
            .append("h1")
            .attr("class", "header")
            .text("Delayed Flights in 2017");
 
-       /* add a full name of airport */
+       /* add a full name of each airport */
         d3.select("body")
           .append("h2")
           .attr("class", "fullAirportName")
           .text("Select an aiport in the map");
 
-        /* add main explainary text */
+        /* add a line of main explainary text on the right panel */
         d3.select("body")
           .append("h2")
           .attr("class", "mainTexts")
@@ -235,7 +233,7 @@
 
 
 
-       /* add a SVG map */
+       /* add a map SVG */
 
          var width = 652;
          var height = 500;
@@ -249,14 +247,11 @@
 
          var svg = d3.select(".map");
 
-
          var projection = d3.geoAlbersUsa()
                     .scale(821)
                     .translate([width/2-15,height/2-55]);
-                    
-                            
+                                               
          var path = d3.geoPath().projection(scale(0.65));
-
 
          var map = svg.append("g")
                       .attr("class", "states")
@@ -281,7 +276,7 @@
           function plot_points(data){
               
               //debugger; 
-              //use this debugger to test whether the data has passed to the plot_points
+              //Use to test if the data has passed to the plot_points
 
               /* ------- Wrap data for each circle----------- */
 
@@ -383,11 +378,12 @@
 
                              .entries(data);
                              
-                             //debugger; // This is used to test the nested function.  The console will present 30 objects including the parameters of totalDelayed, x, and y.
+                             //debugger; 
+                             //Use to test the nested function.  When the codes are running, the console should present 30 objects based on the key - airport - and include all the returned values as object properties.
 
               
 
-              /* --------------------- Draw Map -------------------------*/
+              /* ------------- Plot Circles and Update Behaviors Triggered by the Circle --------------*/
 
               /* Step2 - Set the size of circles */
               var ratio_max = d3.max(nested, function(d){
@@ -399,7 +395,7 @@
                                    .domain([0, ratio_max])
                                    .range([0,12]);
 
-              // return the key
+              /* return the key */
               function key_func(d){
                   return d['key'];
               };
@@ -418,7 +414,8 @@
                   + "<span class = 'tipLabel'>State: </span><span class='tipValue'>" + "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" + d.value['state'] + "<br></span>";
                  });
 
-             //debugger;
+             // debugger;
+             // Use to test the tooltip
 
              svg.call(mapTip);
 
@@ -466,7 +463,9 @@
 
                         /* call update function */
                         update(d['key']);
+                        
                         //debugger;
+                        //Use to test the click behavior
                 });
 
 
@@ -485,7 +484,7 @@
 
              function update(airport){
 
-               /*remove bar chart data */
+                 /* remove bar chart data */
 
                    d3.select(".barChart").remove();
                    d3.select("#bar_Tip").remove();
@@ -498,7 +497,7 @@
 
                    //debugger;
 
-                   /* create a data set */
+                   /* create a dictionary based on the filtered airport */
                    var barDataSet = [{"cause": "Carrier", "amount": filtered[0].value['cos_carrier']}, 
                                     {"cause": "Weather", "amount": filtered[0].value['cos_weather']},
                                     {"cause": "Air Traffic", "amount": filtered[0].value['cos_nas']},
@@ -508,35 +507,36 @@
                                     {"cause": "Diverted Arrivals", "amount": filtered[0].value['cos_divertedArrival']}
                                    ]
                   //debugger;
+                  //Use to test dictionary
                   
-                  /*fin the biggest amount of */
+                  /* find the item with max amount in the dictionary */
                   var maxAmount = d3.max(barDataSet,function(d,i){
                     return +d.amount;
                   }) 
-
                   //debugger;
 
+                  /* find the cause of the maxAmount */
                   var maxCause = barDataSet.filter(function(d){
                     if(d.amount === maxAmount){
                       return d;
                     }
                   })
-
                   //debugger;
+
 
                   /*----update main texts------ */    
 
-                  /* update airport name*/
+                  /* update airport name */
                   d3.select(".fullAirportName")
                     .text(filtered[0].value['airportFull']);
 
-
+                  /* update the texts on the right panel*/
                   d3.select(".mainTexts") 
                     .html("<span class = 'highlighted'>" + filtered[0].value['percentage'] + "</span>" +  "<span class = 'unhighlighted'> of " +  d3.format(",.2r")(filtered[0].value['arrival']) + " flights were delayed, <br> mainly caused by, <br></span> <span class = 'highlighted'>" + maxCause[0].cause + "</span>" );    
                 
 
                   /* --------------- Make a bar Chart ----------*/
-                  /* set the dimensions and margins of the graph*/
+                  /* set the dimensions and margins of the graph */
                   var bar_margin = {top: 54, right: 0, bottom:48, left: 84},
                       bar_width = 504 - bar_margin.left - bar_margin.right,
                       bar_height = 324 - bar_margin.top - bar_margin.bottom,
@@ -568,7 +568,6 @@
   
 
                   /*-- create the svg object of bar chart to the body  --*/
-
                   var barChart = d3.select("body")
                                    .append("svg")
                                    .attr("width", bar_width  + bar_margin.left + bar_margin.right )
@@ -581,7 +580,6 @@
                    
 
                    /* -- add axises to barChart -- */  
-
                    barChart.append("g")
                            .attr("class", "axis")
                            .attr("transform", "translate(0," + bar_height + ")")
@@ -607,9 +605,10 @@
                             g.selectAll(".tick text").attr("x", -15).attr("dy", 0);
                     }
 
+                    /* add a function to wrap the labels of x-axis*/
                     function wrap(text, width) {
                         text.each(function() {
-                          var text = d3.select(this),
+                           var text = d3.select(this),
                            words = text.text().split(/\s+/).reverse(),
                            word,
                            line = [],
@@ -631,7 +630,6 @@
                     })}//end of wrap text function
 
 
-
                    /* ----- create tool tip ------ */   
                     var barTip = d3.tip()
                          .attr('class','tip')
@@ -650,25 +648,25 @@
                           .data(barDataSet)
                           .enter()
                           .append('rect')
-                          /* place and style each bar*/
-                          /* place the order horizontally based on causes and the width of barchart */
-                          
+                          /* --place and style each bar --*/
+                          /* place causes horizontally based on the number of causes and the width of barchart */
                           .attr('x', function(d,i){return xScale(d.cause) + 6;})
-                          /* place vertically based on scale*/
+                          /* place amount vertically based on scale*/
                           .attr('y',function(d,i){return yScale(d.amount);})
                           .attr('width', (bar_width / barDataSet.length) - bar_padding)
                           .attr('height', function(d,i){return bar_height - yScale(d.amount);})
                           .attr('fill',"rgba(186,202,198,1)")
                           .on('mouseover', barTip.show)
-                  .on('mouseout', barTip.hide)
+                          .on('mouseout', barTip.hide)
                           /* filter the bar that holds the maximum amount*/
                           .filter(function(d) { return d.amount === maxAmount; })
-                          /* put the true value, which is the result of filter to the class of max*/
-                .classed("max", true);
+                          /* assign a true value to max amount */
+                          .classed("max", true);
+                          
 
              /* --- add bar chart description --- */
                   d3.select("body")
-                  .append("p")
+                    .append("p")
                     .attr("class", "imageDescription")
                     .attr("id", "barDescription")
                     .text("Flight Delays by Causes");
