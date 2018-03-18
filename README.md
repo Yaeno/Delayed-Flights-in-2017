@@ -5,22 +5,22 @@
 The project is a data visualization telling a story of the delayed flights in 30 major airports across USA in 2017.
 
 ## Data Resource 
-Bureau of Transportation Statistics
-https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp
+<a href = "https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp">Bureau of Transportation Statistics </a>
+
 
 ## Installation 
 To load the file, you will need to start a local service on your computer.
 
-Step1: Download Python3;
-Step2: Navigate to the project (use "cd projectDirectory")
-Step3: Type in "python -m http.server";
-Step4: Type "localhost:8000" in browser;
+Step1: Download Python3;</br>
+Step2: Navigate to the project (use "cd projectDirectory")</br>
+Step3: Type in "python -m http.server";</br>
+Step4: Type "localhost:8000" in browser;</br>
 Optional: If the default protocol 8000 has been used, you can switch the protocol by typing "python -m SimpleHTTPServer 8910" .
 
 After the initial setup, you need to activate the local service before you load the file.
 
-Step1: Navigate to the project;
-Step2: Type in "python -m http.server" when using default protocol;
+Step1: Navigate to the project;</br>
+Step2: Type in "python -m http.server" when using default protocol;</br>
 Optional: Type in "python -m SimpleHTTPServer 8910" when your protocol is switched to 8910.
 
 ## Code Reference 
