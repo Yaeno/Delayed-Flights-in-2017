@@ -2,7 +2,12 @@
 The project is a data visualization telling a story of the delayed flights in 30 major airports across USA in 2017.
 
 ## Demo 
-![Demo](demo.gif)
+
+<strong>Interface</strong>
+![Demo](https://user-images.githubusercontent.com/23627710/37572902-3bd18674-2acf-11e8-8c91-e5eb058b17e9.png)
+
+<strong>Interaction</strong>
+![Demo](https://user-images.githubusercontent.com/23627710/37572844-688da478-2ace-11e8-80ce-334cfab89404.gif)
 
 ## Data Resource 
 <a href = "https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp">Bureau of Transportation Statistics </a>
