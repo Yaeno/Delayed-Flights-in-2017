@@ -3,10 +3,10 @@ The project is a data visualization telling a story of the delayed flights in 30
 
 ## Demo 
 
-<strong>Live Demo</strong>
+<strong>Live Demo</strong></br>
 <a href = "https://codepen.io/Yaeno/project/full/XYrxVR ">Live Demo on CodePen </a></br>
 Note: Please click the Project Name to enter the full project view.
-![Demo](https://user-images.githubusercontent.com/23627710/37596171-8bc45800-2b38-11e8-949f-8516414113af.png)
+![Demo](https://user-images.githubusercontent.com/23627710/37596720-53dfc08a-2b3a-11e8-8e64-1c863be2682b.png)
 
 <strong>Interface</strong>
 ![Demo](https://user-images.githubusercontent.com/23627710/37572902-3bd18674-2acf-11e8-8c91-e5eb058b17e9.png)
