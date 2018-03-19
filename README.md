@@ -6,7 +6,7 @@ The project is a data visualization telling a story of the delayed flights in 30
 <strong>Interface</strong>
 ![Demo](https://user-images.githubusercontent.com/23627710/37572902-3bd18674-2acf-11e8-8c91-e5eb058b17e9.png)
 
-<strong>Interaction</strong>
+<strong>Interaction</strong></br>
 ![Demo](https://user-images.githubusercontent.com/23627710/37572844-688da478-2ace-11e8-80ce-334cfab89404.gif)
 
 ## Data Resource 
