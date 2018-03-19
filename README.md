@@ -3,11 +3,17 @@ The project is a data visualization telling a story of the delayed flights in 30
 
 ## Demo 
 
+<strong>Live Demo</strong>
+<a href = "https://codepen.io/Yaeno/project/full/XYrxVR ">Live Demo on CodePen </a></br>
+Note: Please click the Project Name to enter the full project view.
+![Demo](https://user-images.githubusercontent.com/23627710/37596171-8bc45800-2b38-11e8-949f-8516414113af.png)
+
 <strong>Interface</strong>
 ![Demo](https://user-images.githubusercontent.com/23627710/37572902-3bd18674-2acf-11e8-8c91-e5eb058b17e9.png)
 
 <strong>Interaction</strong></br>
 ![Demo](https://user-images.githubusercontent.com/23627710/37572844-688da478-2ace-11e8-80ce-334cfab89404.gif)
+
 
 ## Data Resource 
 <a href = "https://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp">Bureau of Transportation Statistics </a>
@@ -17,7 +23,9 @@ The project is a data visualization telling a story of the delayed flights in 30
 
 According to <a href="https://github.com/d3/d3/issues/1698">Mike Bostock's comment in 2014</a>, "Chrome disallows XMLHttpReques when running files from the local file system (file:///)".  Due to this limitation, without loading the file via a local server, the US map written in Topo JSON won't display on the screen.
 
-To load the file, you will need to start a local service on your computer.
+<strong> Start a Local Server</strong>
+
+To load the file, you will need to start a local server on your computer.
 
 Step1: Download Python3;</br>
 Step2: Navigate to the project (use "cd projectDirectory")</br>
@@ -25,7 +33,9 @@ Step3: Type in "python -m http.server";</br>
 Step4: Type "localhost:8000" in browser;</br>
 Optional: If the default protocol 8000 is in use, you can switch to another protocol by typing "python -m SimpleHTTPServer 8910" .
 
-After the initial setup, you need to activate the local service before you load the file.
+<strong> Connect to the Local Server </strong>
+
+After the initial setup, you need to connect to the local server before you load the file.
 
 Step1: Navigate to the project;</br>
 Step2: Type in "python -m http.server" when using the default protocol 8000;</br>
